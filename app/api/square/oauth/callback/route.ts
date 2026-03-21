@@ -53,7 +53,11 @@ export async function GET(req: NextRequest) {
 
     const locData = await locRes.json();
 
-    const locationId = locData.locations?.[0]?.id;
+    const location = locData.locations?.[0];
+
+    const locationId = location?.id;
+    const locationName = location?.name;
+    const businessName = location?.business_name;
 
     console.log("[OAUTH] Location:", { locationId });
 
@@ -63,14 +67,16 @@ export async function GET(req: NextRequest) {
     const db = await getDb();
 
     await db.collection("clients").updateOne(
-      { clientId },
+      { merchantId: merchant_id },
       {
         $set: {
+          merchantId: merchant_id,
+          businessName,
           square: {
             accessToken: access_token,
             refreshToken: refresh_token,
-            merchantId: merchant_id,
             expiresAt: expires_at,
+            locationName,
             locationId,
           },
           updatedAt: new Date(),
